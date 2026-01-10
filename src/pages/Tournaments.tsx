@@ -1,22 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Navbar } from '../components/Navbar';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase'; // <--- Importei o AUTH
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import type { Tournament } from '../types/Tournament';
-import { Calendar, Users, Trophy, Plus, Swords } from 'lucide-react';
+import { Calendar, Users, Trophy, Plus, Swords, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserData } from '../hooks/useUserData';
+import { onAuthStateChanged } from 'firebase/auth'; // <--- Para monitorar o login
 
 export function Tournaments() {
   const navigate = useNavigate();
   const { isAdmin } = useUserData();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Novo estado para saber se tem alguém logado
+  const [user, setUser] = useState(auth.currentUser);
+
+  // Monitora em tempo real se o usuário logou ou saiu
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     async function fetchTournaments() {
       try {
-        // Busca tudo ordenado por data
         const q = query(collection(db, "tournaments"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
         
@@ -25,10 +36,7 @@ export function Tournaments() {
           ...doc.data()
         })) as Tournament[];
 
-        // O PULO DO GATO: Filtra para mostrar APENAS os abertos (aprovados)
-        // Sugestões (pending) ficam escondidas aqui
         setTournaments(data.filter(t => t.status === 'open'));
-        
       } catch (error) {
         console.error("Erro ao buscar torneios:", error);
       } finally {
@@ -62,6 +70,8 @@ export function Tournaments() {
           </div>
           
           <div className="flex gap-3">
+            
+            {/* 1. Botão de Admin (Só aparece se for Admin) */}
             {isAdmin && (
               <button 
                 onClick={() => navigate('/admin')}
@@ -71,12 +81,25 @@ export function Tournaments() {
               </button>
             )}
             
-            <button 
-              onClick={() => navigate('/tournaments/new')}
-              className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-violet-600/20"
-            >
-              <Plus size={20} /> {isAdmin ? "Criar Oficial" : "Sugerir Torneio"}
-            </button>
+            {/* 2. Botão Dinâmico (Muda dependendo se tá logado ou não) */}
+            {user ? (
+              // SE TIVER LOGADO: Pode criar ou sugerir
+              <button 
+                onClick={() => navigate('/tournaments/new')}
+                className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-violet-600/20"
+              >
+                <Plus size={20} /> {isAdmin ? "Criar Oficial" : "Sugerir Torneio"}
+              </button>
+            ) : (
+              // SE NÃO TIVER LOGADO: Manda ir pro login
+              <button 
+                onClick={() => navigate('/login')}
+                className="flex items-center gap-2 px-6 py-3 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold rounded-lg transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700"
+              >
+                <LogIn size={20} /> Entrar para Sugerir
+              </button>
+            )}
+
           </div>
         </div>
 
