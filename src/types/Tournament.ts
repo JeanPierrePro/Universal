@@ -10,5 +10,8 @@ export interface Tournament {
   prizePool: string;
   createdBy: string;
   bannerUrl?: string;
-  contactInfo?: string; // Novo campo de contato
+  contactInfo?: string;
+  // NOVOS CAMPOS:
+  wantsBroadcast?: boolean; // Quer transmissão?
+  wantsCaster?: boolean;    // Quer narrador?
 }
