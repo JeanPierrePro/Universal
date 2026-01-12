@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useUserData } from '../hooks/useUserData';
-import { LogOut, Trophy, User } from 'lucide-react';
+import { Trophy } from 'lucide-react'; // <--- AQUI: Removi LogOut e User que não estavam sendo usados
 import { auth } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 
@@ -14,7 +14,6 @@ export function Navbar() {
   }
 
   return (
-    // AQUI ESTÁ A MUDANÇA: border-b border-purple-600 (Borda roxa embaixo)
     <nav className="fixed w-full z-50 transition-all duration-300 bg-[#05000A]/90 backdrop-blur-md border-b border-purple-600 shadow-[0_4px_30px_rgba(126,34,206,0.3)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
