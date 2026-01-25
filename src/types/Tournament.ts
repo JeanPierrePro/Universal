@@ -11,7 +11,8 @@ export interface Tournament {
   createdBy: string;
   bannerUrl?: string;
   contactInfo?: string;
-  // NOVOS CAMPOS:
-  wantsBroadcast?: boolean; // Quer transmissão?
-  wantsCaster?: boolean;    // Quer narrador?
+  wantsBroadcast?: boolean;
+  wantsCaster?: boolean;
+  // NOVO CAMPO:
+  currentTeams?: number; // Quantos times já estão inscritos
 }
